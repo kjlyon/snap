@@ -1,4 +1,4 @@
-// +build medium
+// + build medium
 
 /*
 http://www.apache.org/licenses/LICENSE-2.0.txt
@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -34,7 +35,9 @@ import (
 )
 
 var (
-	LOG_LEVEL = log.WarnLevel
+	LOG_LEVEL         = log.WarnLevel
+	SNAP_PATH         = os.ExpandEnv(os.Getenv("SNAP_PATH"))
+	MOCK_PLUGIN_PATH1 = SNAP_PATH + "/plugin/snap-plugin-collector-mock1"
 )
 
 type restAPIInstance struct {
@@ -72,6 +75,7 @@ func startV1API(cfg *mockConfig) *restAPIInstance {
 func TestV1(t *testing.T) {
 	r := startV1API(getDefaultMockConfig())
 	Convey("Test REST API V1", t, func() {
+		//////////TEST-PLUGIN-ROUTES/////////////////
 		Convey("Get plugins - v1/plugins", func() {
 			resp, err := http.Get(
 				fmt.Sprintf("http://localhost:%d/v1/plugins", r.port))
@@ -92,12 +96,117 @@ func TestV1(t *testing.T) {
 			So(resp.StatusCode, ShouldEqual, 200)
 			body, err := ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
-			fmt.Print(string(body))
 			So(
 				fmt.Sprintf(fixtures.GET_PLUGINS_RESPONSE_TYPE, r.port, r.port),
 				ShouldResemble,
 				string(body))
 		})
+		Convey("Get plugins - v1/plugins/:type:name", func() {
+			resp, err := http.Get(
+				fmt.Sprintf("http://localhost:%d/v1/plugins/publisher/bar", r.port))
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, 200)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.GET_PLUGINS_RESPONSE_TYPE_NAME, r.port),
+				ShouldResemble,
+				string(body))
+		})
+		Convey("Get plugins - v1/plugins/:type:name:version", func() {
+			resp, err := http.Get(
+				fmt.Sprintf("http://localhost:%d/v1/plugins/publisher/bar/3", r.port))
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, 200)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.GET_PLUGINS_RESPONSE_TYPE_NAME_VERSION, r.port),
+				ShouldResemble,
+				string(body))
+		})
+
+		Convey("Post plugins - v1/plugins/:type:name", func() {
+			// TODO add an issue that describes how posting an empty body should result in an error
+			// it currently returns success (200)
+
+			// resp1, err1 := http.Post(
+			// 	fmt.Sprintf("http://localhost:%d/v1/plugins", r.port), "text/plain", strings.NewReader("body"))
+			// So(err1, ShouldBeNil)
+			// So(resp1.StatusCode, ShouldEqual, 200)
+
+			f, err := os.Open(MOCK_PLUGIN_PATH1)
+			So(err, ShouldBeNil)
+
+			resp1, err1 := http.Post(
+				fmt.Sprintf("http://localhost:%d/v1/plugins", r.port), "text/plain", f)
+			So(err1, ShouldBeNil)
+			So(resp1.StatusCode, ShouldEqual, 200)
+
+		})
+		//Convey("Delete plugins - v1/plugins/:type:name:version", func() {		})
+
+		Convey("Get plugin config items - v1/plugins/:type:name:version:config", func() {
+			resp, err := http.Get(
+				fmt.Sprintf("http://localhost:%d/v1/plugins/publisher/bar/3/", r.port))
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, 200)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.GET_PLUGIN_CONFIG_ITEM, r.port),
+				ShouldResemble,
+				string(body))
+		})
+
+		//////////TEST-METRIC-ROUTES/////////////////
+
+		Convey("Get metric items - v1/metrics", func() {
+			resp, err := http.Get(
+				fmt.Sprintf("http://localhost:%d/v1/metrics", r.port))
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, 200)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			//fmt.Print(string(body))
+			So(
+				fmt.Sprintf(fixtures.GET_METRICS_RESPONSE),
+				ShouldResemble,
+				string(body))
+		})
+		Convey("Get metric items - v1/metrics/*namespace", func() {
+			resp, err := http.Get(
+				fmt.Sprintf("http://localhost:%d/v1/metrics/", r.port))
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, 200)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			//fmt.Print(string(body))
+			So(
+				fmt.Sprintf(fixtures.GET_METRICS_RESPONSE), //will be same as above
+				ShouldResemble,
+				string(body))
+		})
+
+		//////////TEST-TASK-ROUTES/////////////////
+
+		//Needs something to do with MockManagesTasks in fixtures.go
+
+		// Convey("Get tasks - v1/tasks", func() {
+		// 	resp, err := http.Get(
+		// 		fmt.Sprintf("http://localhost:%d/v1/tasks", r.port))
+		// 	So(err, ShouldBeNil)
+		// 	So(resp.StatusCode, ShouldEqual, 200)
+		// 	body, err := ioutil.ReadAll(resp.Body)
+		// 	So(err, ShouldBeNil)
+		// 	So(
+		// 		fmt.Sprintf(fixtures.GET_PLUGINS_RESPONSE, r.port, r.port,
+		// 			r.port, r.port, r.port, r.port),
+		// 		ShouldResemble,
+		// 		string(body))
+		// })
+
+		//////////TEST-TRIBE-ROUTES/////////////////
 
 	})
 }
