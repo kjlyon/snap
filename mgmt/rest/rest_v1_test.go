@@ -22,8 +22,13 @@ limitations under the License.
 package rest
 
 import (
+	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"testing"
@@ -31,6 +36,8 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/intelsdi-x/snap/core/cdata"
+	"github.com/intelsdi-x/snap/core/ctypes"
 	"github.com/intelsdi-x/snap/mgmt/rest/fixtures"
 )
 
@@ -48,12 +55,14 @@ type restAPIInstance struct {
 func startV1API(cfg *mockConfig) *restAPIInstance {
 	// Start a REST API to talk to
 	log.SetLevel(LOG_LEVEL)
-	mockMetricManager := &fixtures.MockManagesMetrics{}
 	r, _ := New(cfg.RestAPI)
-	r.BindMetricManager(mockMetricManager)
+	mockMetricManager := &fixtures.MockManagesMetrics{}
 	mockTaskManager := &fixtures.MockManagesTasks{}
+	mockConfigManager := &fixtures.MockConfigManager{}
 	//TODO bind mock task manager r.BindTaskManager(s)
+	r.BindMetricManager(mockMetricManager)
 	r.BindTaskManager(mockTaskManager)
+	r.BindConfigManager(mockConfigManager)
 	//TODO bind mock config manager r.BindConfigManager(c.Config)
 	go func(ch <-chan error) {
 		// Block on the error channel. Will return exit status 1 for an error or
@@ -126,67 +135,198 @@ func TestV1(t *testing.T) {
 				string(body))
 		})
 
-		Convey("Post plugins - v1/plugins/:type:name", func() {
-			// TODO add an issue that describes how posting an empty body should result in an error
-			// it currently returns success (200)
-
-			// resp1, err1 := http.Post(
-			// 	fmt.Sprintf("http://localhost:%d/v1/plugins", r.port), "text/plain", strings.NewReader("body"))
-			// So(err1, ShouldBeNil)
-			// So(resp1.StatusCode, ShouldEqual, 200)
-
+		Convey("Post plugins - v1/plugins/:type:name", func(c C) {
 			f, err := os.Open(MOCK_PLUGIN_PATH1)
+			defer f.Close()
 			So(err, ShouldBeNil)
 
+			// We create a pipe so that we can write the file in multipart
+			// format and read it in to the body of the http request
+			reader, writer := io.Pipe()
+			mwriter := multipart.NewWriter(writer)
+			bufin := bufio.NewReader(f)
+
+			// A go routine is needed since we must write the multipart file
+			// to the pipe so we can read from it in the http call
+			go func() {
+				part, err := mwriter.CreateFormFile("snap-plugins", "mock")
+				c.So(err, ShouldBeNil)
+				bufin.WriteTo(part)
+				mwriter.Close()
+				writer.Close()
+			}()
+
 			resp1, err1 := http.Post(
-				fmt.Sprintf("http://localhost:%d/v1/plugins", r.port), "text/plain", f)
+				fmt.Sprintf("http://localhost:%d/v1/plugins", r.port),
+				mwriter.FormDataContentType(), reader)
 			So(err1, ShouldBeNil)
-			So(resp1.StatusCode, ShouldEqual, 200)
-
+			So(resp1.StatusCode, ShouldEqual, 201)
 		})
-		//Convey("Delete plugins - v1/plugins/:type:name:version", func() {		})
 
-		Convey("Get plugin config items - v1/plugins/:type:name:version:config", func() {
+		Convey("Delete plugins - v1/plugins/:type:name:version", func() {
+			c := &http.Client{}
+			pluginName := "foo"
+			pluginType := "collector"
+			pluginVersion := 2
+			req, err := http.NewRequest(
+				http.MethodDelete,
+				fmt.Sprintf("http://localhost:%d/v1/plugins/%s/%s/%d",
+					r.port,
+					pluginType,
+					pluginName,
+					pluginVersion),
+				bytes.NewReader([]byte{}))
+			So(err, ShouldBeNil)
+			resp, err := c.Do(req)
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, http.StatusOK)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.UNLOAD_PLUGIN),
+				ShouldResemble,
+				string(body))
+		})
+
+		Convey("Get plugin config items - v1/plugins/:type/:name/:version/config", func() {
 			resp, err := http.Get(
-				fmt.Sprintf("http://localhost:%d/v1/plugins/publisher/bar/3/", r.port))
+				fmt.Sprintf("http://localhost:%d/v1/plugins/publisher/bar/3/config", r.port))
 			So(err, ShouldBeNil)
 			So(resp.StatusCode, ShouldEqual, 200)
 			body, err := ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.GET_PLUGIN_CONFIG_ITEM, r.port),
+				fmt.Sprintf(fixtures.GET_PLUGIN_CONFIG_ITEM),
 				ShouldResemble,
 				string(body))
+
+			//DOES SAME THING
+
+			// c := &http.Client{}
+			// pluginName := "bar"
+			// pluginType := "publisher"
+			// pluginVersion := 3
+			// cd := cdata.NewNode()
+			// cd.AddItem("user", ctypes.ConfigValueStr{Value: "Jane"})
+			// body, err := cd.MarshalJSON()
+			// So(err, ShouldBeNil)
+
+			// req, err := http.NewRequest(
+			// 	http.MethodGet,
+			// 	fmt.Sprintf("http://localhost:%d/v1/plugins/%s/%s/%d/config",
+			// 		r.port,
+			// 		pluginType,
+			// 		pluginName,
+			// 		pluginVersion),
+			// 	bytes.NewReader(body))
+			// So(err, ShouldBeNil)
+			// resp, err := c.Do(req)
+			// So(err, ShouldBeNil)
+			// So(resp.StatusCode, ShouldEqual, http.StatusOK)
+			// body, err = ioutil.ReadAll(resp.Body)
+			// So(err, ShouldBeNil)
+			// //fmt.Print(string(body))
+			// So(
+			// 	fmt.Sprintf(fixtures.GET_PLUGIN_CONFIG_ITEM),
+			// 	ShouldResemble,
+			//	string(body))
+
+		})
+
+		Convey("Put plugins - v1/plugins/:type/:name/:version/config", func() {
+			c := &http.Client{}
+			pluginName := "foo"
+			pluginType := "collector"
+			pluginVersion := 2
+			cd := cdata.NewNode()
+			cd.AddItem("user", ctypes.ConfigValueStr{Value: "Jane"})
+			body, err := cd.MarshalJSON()
+			So(err, ShouldBeNil)
+
+			req, err := http.NewRequest(
+				http.MethodPut,
+				fmt.Sprintf("http://localhost:%d/v1/plugins/%s/%s/%d/config",
+					r.port,
+					pluginType,
+					pluginName,
+					pluginVersion),
+				bytes.NewReader(body))
+			So(err, ShouldBeNil)
+			resp, err := c.Do(req)
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, http.StatusOK)
+			body, err = ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.PUT_PLUGIN_CONFIG_ITEM),
+				ShouldResemble,
+				string(body))
+
+		})
+
+		Convey("Delete Plugin Config Item - /v1/plugins/:type/:name/:version/config", func() {
+			c := &http.Client{}
+			pluginName := "foo"
+			pluginType := "collector"
+			pluginVersion := 2
+
+			//cd := cdata.NewNode()
+			//cd.AddItem("user", ctypes.ConfigValueStr{Value: "Jane"})
+			cd := []string{"foo"}
+			body, err := json.Marshal(cd)
+			//body, err := cd.MarshalJSON()
+			So(err, ShouldBeNil)
+
+			req, err := http.NewRequest(
+				http.MethodDelete,
+				fmt.Sprintf("http://localhost:%d/v1/plugins/%s/%s/%d/config",
+					r.port,
+					pluginType,
+					pluginName,
+					pluginVersion),
+				bytes.NewReader(body))
+
+			So(err, ShouldBeNil)
+			resp, err := c.Do(req) //Why does DO implementation not have an option for DELETE, why does it work in other one?
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, http.StatusOK)
+			body, err = ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.DELETE_PLUGIN_CONFIG_ITEM),
+				ShouldResemble,
+				string(body))
+
 		})
 
 		//////////TEST-METRIC-ROUTES/////////////////
 
-		Convey("Get metric items - v1/metrics", func() {
-			resp, err := http.Get(
-				fmt.Sprintf("http://localhost:%d/v1/metrics", r.port))
-			So(err, ShouldBeNil)
-			So(resp.StatusCode, ShouldEqual, 200)
-			body, err := ioutil.ReadAll(resp.Body)
-			So(err, ShouldBeNil)
-			//fmt.Print(string(body))
-			So(
-				fmt.Sprintf(fixtures.GET_METRICS_RESPONSE),
-				ShouldResemble,
-				string(body))
-		})
-		Convey("Get metric items - v1/metrics/*namespace", func() {
-			resp, err := http.Get(
-				fmt.Sprintf("http://localhost:%d/v1/metrics/", r.port))
-			So(err, ShouldBeNil)
-			So(resp.StatusCode, ShouldEqual, 200)
-			body, err := ioutil.ReadAll(resp.Body)
-			So(err, ShouldBeNil)
-			//fmt.Print(string(body))
-			So(
-				fmt.Sprintf(fixtures.GET_METRICS_RESPONSE), //will be same as above
-				ShouldResemble,
-				string(body))
-		})
+		// Convey("Get metric items - v1/metrics", func() {
+		// 	resp, err := http.Get(
+		// 		fmt.Sprintf("http://localhost:%d/v1/metrics", r.port))
+		// 	So(err, ShouldBeNil)
+		// 	So(resp.StatusCode, ShouldEqual, 200)
+		// 	body, err := ioutil.ReadAll(resp.Body)
+		// 	So(err, ShouldBeNil)
+		// 	fmt.Print(string(body))
+		// 	So(
+		// 		fmt.Sprintf(fixtures.GET_METRICS_RESPONSE),
+		// 		ShouldResemble,
+		// 		string(body))
+		// })
+		// Convey("Get metric items - v1/metrics/*namespace", func() {
+		// 	resp, err := http.Get(
+		// 		fmt.Sprintf("http://localhost:%d/v1/metrics/", r.port))
+		// 	So(err, ShouldBeNil)
+		// 	So(resp.StatusCode, ShouldEqual, 200)
+		// 	body, err := ioutil.ReadAll(resp.Body)
+		// 	So(err, ShouldBeNil)
+		// 	//fmt.Print(string(body))
+		// 	So(
+		// 		fmt.Sprintf(fixtures.GET_METRICS_RESPONSE), //will be same as above
+		// 		ShouldResemble,
+		// 		string(body))
+		// })
 
 		//////////TEST-TASK-ROUTES/////////////////
 
@@ -209,4 +349,5 @@ func TestV1(t *testing.T) {
 		//////////TEST-TRIBE-ROUTES/////////////////
 
 	})
+
 }

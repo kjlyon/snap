@@ -21,6 +21,7 @@ limitations under the License.
 package fixtures
 
 import (
+	"errors"
 	"time"
 
 	"github.com/intelsdi-x/snap/control/plugin/cpolicy"
@@ -56,6 +57,15 @@ func (m MockLoadedPlugin) LastHit() time.Time {
 }
 func (m MockLoadedPlugin) ID() uint32 { return 0 }
 
+var catalog []core.CatalogedPlugin = []core.CatalogedPlugin{
+	MockLoadedPlugin{MyName: "foo", MyType: "collector", MyVersion: 2},
+	MockLoadedPlugin{MyName: "bar", MyType: "publisher", MyVersion: 3},
+	MockLoadedPlugin{MyName: "foo", MyType: "collector", MyVersion: 4},
+	MockLoadedPlugin{MyName: "baz", MyType: "publisher", MyVersion: 5},
+	MockLoadedPlugin{MyName: "foo", MyType: "processor", MyVersion: 6},
+	MockLoadedPlugin{MyName: "foobar", MyType: "processor", MyVersion: 1},
+}
+
 type MockManagesMetrics struct{}
 
 func (m MockManagesMetrics) MetricCatalog() ([]core.CatalogedMetric, error) {
@@ -71,21 +81,21 @@ func (m MockManagesMetrics) GetMetric(core.Namespace, int) (core.CatalogedMetric
 	return nil, nil
 }
 func (m MockManagesMetrics) Load(*core.RequestedPlugin) (core.CatalogedPlugin, serror.SnapError) {
-	return nil, nil
+	return MockLoadedPlugin{"foo", "collector", 1}, nil
 }
-func (m MockManagesMetrics) Unload(core.Plugin) (core.CatalogedPlugin, serror.SnapError) {
-	return nil, nil
+func (m MockManagesMetrics) Unload(plugin core.Plugin) (core.CatalogedPlugin, serror.SnapError) {
+	for _, pl := range catalog {
+		if plugin.Name() == pl.Name() &&
+			plugin.Version() == pl.Version() &&
+			plugin.TypeName() == pl.TypeName() {
+			return pl, nil
+		}
+	}
+	return nil, serror.New(errors.New("plugin not found"))
 }
 
 func (m MockManagesMetrics) PluginCatalog() core.PluginCatalog {
-	return []core.CatalogedPlugin{
-		MockLoadedPlugin{MyName: "foo", MyType: "collector", MyVersion: 2},
-		MockLoadedPlugin{MyName: "bar", MyType: "publisher", MyVersion: 3},
-		MockLoadedPlugin{MyName: "foo", MyType: "collector", MyVersion: 4},
-		MockLoadedPlugin{MyName: "baz", MyType: "publisher", MyVersion: 5},
-		MockLoadedPlugin{MyName: "foo", MyType: "processor", MyVersion: 6},
-		MockLoadedPlugin{MyName: "foobar", MyType: "processor", MyVersion: 1},
-	}
+	return catalog
 }
 func (m MockManagesMetrics) AvailablePlugins() []core.AvailablePlugin {
 	return []core.AvailablePlugin{
@@ -281,24 +291,6 @@ const (
   }
 }`
 
-	GET_PLUGIN_CONFIG_ITEM = `{
-  "meta": {
-    "code": 200,
-    "message": "Plugin returned",
-    "type": "plugin_returned",
-    "version": 1
-  },
-  "body": {
-    "name": "bar",
-    "version": 3,
-    "type": "publisher",
-    "signed": false,
-    "status": "",
-    "loaded_timestamp": 1473120000,
-    "href": "http://localhost:%d/v1/plugins/publisher/bar/3"
-  }
-}`
-
 	GET_METRICS_RESPONSE = `{
   "meta": {
     "code": 200,
@@ -307,5 +299,19 @@ const (
     "version": 1
   },
   "body": []
+}`
+
+	UNLOAD_PLUGIN = `{
+  "meta": {
+    "code": 200,
+    "message": "Plugin successfully unloaded (foov2)",
+    "type": "plugin_unloaded",
+    "version": 1
+  },
+  "body": {
+    "name": "foo",
+    "version": 2,
+    "type": "collector"
+  }
 }`
 )

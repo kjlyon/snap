@@ -456,15 +456,15 @@ func (s *Server) BindConfigManager(c managesConfig) {
 
 func (s *Server) addRoutes() {
 	// plugin routes
-	s.r.GET("/v1/plugins", s.getPlugins)                     //done
-	s.r.GET("/v1/plugins/:type", s.getPlugins)               //done
-	s.r.GET("/v1/plugins/:type/:name", s.getPlugins)         //done
-	s.r.GET("/v1/plugins/:type/:name/:version", s.getPlugin) //done
-	s.r.POST("/v1/plugins", s.loadPlugin)
-	s.r.DELETE("/v1/plugins/:type/:name/:version", s.unloadPlugin)
-	s.r.GET("/v1/plugins/:type/:name/:version/config", s.getPluginConfigItem) //done
-	s.r.PUT("/v1/plugins/:type/:name/:version/config", s.setPluginConfigItem)
-	s.r.DELETE("/v1/plugins/:type/:name/:version/config", s.deletePluginConfigItem)
+	s.r.GET("/v1/plugins", s.getPlugins)                                            //done
+	s.r.GET("/v1/plugins/:type", s.getPlugins)                                      //done
+	s.r.GET("/v1/plugins/:type/:name", s.getPlugins)                                //done
+	s.r.GET("/v1/plugins/:type/:name/:version", s.getPlugin)                        //done
+	s.r.POST("/v1/plugins", s.loadPlugin)                                           //done
+	s.r.DELETE("/v1/plugins/:type/:name/:version", s.unloadPlugin)                  //done
+	s.r.GET("/v1/plugins/:type/:name/:version/config", s.getPluginConfigItem)       //done
+	s.r.PUT("/v1/plugins/:type/:name/:version/config", s.setPluginConfigItem)       //done
+	s.r.DELETE("/v1/plugins/:type/:name/:version/config", s.deletePluginConfigItem) //done
 
 	// metric routes
 	s.r.GET("/v1/metrics", s.getMetrics)                    //done- NOT RIGHT
