@@ -27,8 +27,6 @@ import (
 	"github.com/intelsdi-x/snap/control/plugin/cpolicy"
 	"github.com/intelsdi-x/snap/core"
 	"github.com/intelsdi-x/snap/core/serror"
-	"github.com/intelsdi-x/snap/pkg/schedule"
-	"github.com/intelsdi-x/snap/scheduler/wmap"
 )
 
 type MockLoadedPlugin struct {
@@ -66,19 +64,37 @@ var catalog []core.CatalogedPlugin = []core.CatalogedPlugin{
 	MockLoadedPlugin{MyName: "foobar", MyType: "processor", MyVersion: 1},
 }
 
+//////////
+type MockCatalogedMetric struct{}
+
+func (m MockCatalogedMetric) Namespace() core.Namespace {
+	return core.NewNamespace("one", "two", "three")
+}
+func (m MockCatalogedMetric) Version() int                      { return 5 }
+func (m MockCatalogedMetric) LastAdvertisedTime() time.Time     { return time.Time{} }
+func (m MockCatalogedMetric) Policy() *cpolicy.ConfigPolicyNode { return cpolicy.NewPolicyNode() }
+func (m MockCatalogedMetric) Description() string               { return "This Is A Description" }
+func (m MockCatalogedMetric) Unit() string                      { return "" }
+
+var metricCatalog []core.CatalogedMetric = []core.CatalogedMetric{
+	MockCatalogedMetric{},
+}
+
+///////////
+
 type MockManagesMetrics struct{}
 
 func (m MockManagesMetrics) MetricCatalog() ([]core.CatalogedMetric, error) {
-	return nil, nil
+	return metricCatalog, nil
 }
 func (m MockManagesMetrics) FetchMetrics(core.Namespace, int) ([]core.CatalogedMetric, error) {
-	return nil, nil
+	return metricCatalog, nil
 }
 func (m MockManagesMetrics) GetMetricVersions(core.Namespace) ([]core.CatalogedMetric, error) {
-	return nil, nil
+	return metricCatalog, nil
 }
 func (m MockManagesMetrics) GetMetric(core.Namespace, int) (core.CatalogedMetric, error) {
-	return nil, nil
+	return MockCatalogedMetric{}, nil
 }
 func (m MockManagesMetrics) Load(*core.RequestedPlugin) (core.CatalogedPlugin, serror.SnapError) {
 	return MockLoadedPlugin{"foo", "collector", 1}, nil
@@ -110,47 +126,6 @@ func (m MockManagesMetrics) AvailablePlugins() []core.AvailablePlugin {
 func (m MockManagesMetrics) GetAutodiscoverPaths() []string {
 	return nil
 }
-
-////////////////
-type mockTask struct{}
-
-func (t *mockTask) ID() string                                { return "" }
-func (t *mockTask) State() core.TaskState                     { return core.TaskSpinning }
-func (t *mockTask) HitCount() uint                            { return 0 }
-func (t *mockTask) GetName() string                           { return "" }
-func (t *mockTask) SetName(string)                            { return }
-func (t *mockTask) SetID(string)                              { return }
-func (t *mockTask) MissedCount() uint                         { return 0 }
-func (t *mockTask) FailedCount() uint                         { return 0 }
-func (t *mockTask) LastFailureMessage() string                { return "" }
-func (t *mockTask) LastRunTime() *time.Time                   { return nil }
-func (t *mockTask) CreationTime() *time.Time                  { return nil }
-func (t *mockTask) DeadlineDuration() time.Duration           { return 0 }
-func (t *mockTask) SetDeadlineDuration(time.Duration)         { return }
-func (t *mockTask) SetTaskID(id string)                       { return }
-func (t *mockTask) SetStopOnFailure(int)                      { return }
-func (t *mockTask) GetStopOnFailure() int                     { return 0 }
-func (t *mockTask) Option(...core.TaskOption) core.TaskOption { return core.TaskDeadlineDuration(0) }
-func (t *mockTask) WMap() *wmap.WorkflowMap                   { return nil }
-func (t *mockTask) Schedule() schedule.Schedule               { return nil }
-func (t *mockTask) MaxFailures() int                          { return 10 }
-
-type MockManagesTasks struct{}
-
-func (m *MockManagesTasks) GetTask(id string) (core.Task, error) { return &mockTask{}, nil }
-func (m *MockManagesTasks) CreateTask(sch schedule.Schedule, wmap *wmap.WorkflowMap, start bool, opts ...core.TaskOption) (core.Task, core.TaskErrors) {
-	return nil, nil
-}
-func (m *MockManagesTasks) GetTasks() map[string]core.Task         { return nil }
-func (m *MockManagesTasks) StartTask(id string) []serror.SnapError { return nil }
-func (m *MockManagesTasks) StopTask(id string) []serror.SnapError  { return nil }
-func (m *MockManagesTasks) RemoveTask(id string) error             { return nil }
-func (m *MockManagesTasks) WatchTask(id string, handler core.TaskWatcherHandler) (core.TaskWatcherCloser, error) {
-	return nil, nil
-}
-func (m *MockManagesTasks) EnableTask(id string) (core.Task, error) { return nil, nil }
-
-////////////////
 
 const (
 	GET_PLUGINS_RESPONSE = `{
@@ -298,7 +273,16 @@ const (
     "type": "metrics_returned",
     "version": 1
   },
-  "body": []
+  "body": [
+    {
+      "last_advertised_timestamp": -62135596800,
+      "namespace": "/one/two/three",
+      "version": 5,
+      "dynamic": false,
+      "description": "This Is A Description",
+      "href": "http://localhost:%d/v1/metrics?ns=/one/two/three&ver=5"
+    }
+  ]
 }`
 
 	UNLOAD_PLUGIN = `{

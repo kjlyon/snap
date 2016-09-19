@@ -30,7 +30,9 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -45,6 +47,7 @@ var (
 	LOG_LEVEL         = log.WarnLevel
 	SNAP_PATH         = os.ExpandEnv(os.Getenv("SNAP_PATH"))
 	MOCK_PLUGIN_PATH1 = SNAP_PATH + "/plugin/snap-plugin-collector-mock1"
+	MOCK_TASK_PATH1   = SNAP_PATH + "/tasks/snap-task-collector-mock1"
 )
 
 type restAPIInstance struct {
@@ -57,7 +60,7 @@ func startV1API(cfg *mockConfig) *restAPIInstance {
 	log.SetLevel(LOG_LEVEL)
 	r, _ := New(cfg.RestAPI)
 	mockMetricManager := &fixtures.MockManagesMetrics{}
-	mockTaskManager := &fixtures.MockManagesTasks{}
+	mockTaskManager := &fixtures.MockTaskManager{}
 	mockConfigManager := &fixtures.MockConfigManager{}
 	//TODO bind mock task manager r.BindTaskManager(s)
 	r.BindMetricManager(mockMetricManager)
@@ -269,14 +272,9 @@ func TestV1(t *testing.T) {
 			pluginName := "foo"
 			pluginType := "collector"
 			pluginVersion := 2
-
-			//cd := cdata.NewNode()
-			//cd.AddItem("user", ctypes.ConfigValueStr{Value: "Jane"})
 			cd := []string{"foo"}
 			body, err := json.Marshal(cd)
-			//body, err := cd.MarshalJSON()
 			So(err, ShouldBeNil)
-
 			req, err := http.NewRequest(
 				http.MethodDelete,
 				fmt.Sprintf("http://localhost:%d/v1/plugins/%s/%s/%d/config",
@@ -301,50 +299,168 @@ func TestV1(t *testing.T) {
 
 		//////////TEST-METRIC-ROUTES/////////////////
 
-		// Convey("Get metric items - v1/metrics", func() {
-		// 	resp, err := http.Get(
-		// 		fmt.Sprintf("http://localhost:%d/v1/metrics", r.port))
-		// 	So(err, ShouldBeNil)
-		// 	So(resp.StatusCode, ShouldEqual, 200)
-		// 	body, err := ioutil.ReadAll(resp.Body)
-		// 	So(err, ShouldBeNil)
-		// 	fmt.Print(string(body))
-		// 	So(
-		// 		fmt.Sprintf(fixtures.GET_METRICS_RESPONSE),
-		// 		ShouldResemble,
-		// 		string(body))
-		// })
-		// Convey("Get metric items - v1/metrics/*namespace", func() {
-		// 	resp, err := http.Get(
-		// 		fmt.Sprintf("http://localhost:%d/v1/metrics/", r.port))
-		// 	So(err, ShouldBeNil)
-		// 	So(resp.StatusCode, ShouldEqual, 200)
-		// 	body, err := ioutil.ReadAll(resp.Body)
-		// 	So(err, ShouldBeNil)
-		// 	//fmt.Print(string(body))
-		// 	So(
-		// 		fmt.Sprintf(fixtures.GET_METRICS_RESPONSE), //will be same as above
-		// 		ShouldResemble,
-		// 		string(body))
-		// })
+		Convey("Get metric items - v1/metrics", func() {
+			resp, err := http.Get(
+				fmt.Sprintf("http://localhost:%d/v1/metrics", r.port))
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, 200)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			resp1, err := url.QueryUnescape(string(body))
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.GET_METRICS_RESPONSE, r.port),
+				ShouldResemble,
+				resp1)
+		})
+
+		Convey("Get metric items - v1/metrics/*namespace", func() {
+			resp, err := http.Get(
+				fmt.Sprintf("http://localhost:%d/v1/metrics/*namespace", r.port))
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, 200)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			resp1, err := url.QueryUnescape(string(body))
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.GET_METRICS_RESPONSE, r.port),
+				ShouldResemble,
+				resp1)
+		})
 
 		//////////TEST-TASK-ROUTES/////////////////
 
-		//Needs something to do with MockManagesTasks in fixtures.go
+		Convey("Get tasks - v1/tasks", func() {
+			resp, err := http.Get(
+				fmt.Sprintf("http://localhost:%d/v1/tasks", r.port))
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, 200)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.GET_TASKS_RESPONSE, r.port, r.port),
+				ShouldResemble,
+				string(body))
+		})
 
-		// Convey("Get tasks - v1/tasks", func() {
-		// 	resp, err := http.Get(
-		// 		fmt.Sprintf("http://localhost:%d/v1/tasks", r.port))
-		// 	So(err, ShouldBeNil)
-		// 	So(resp.StatusCode, ShouldEqual, 200)
-		// 	body, err := ioutil.ReadAll(resp.Body)
-		// 	So(err, ShouldBeNil)
-		// 	So(
-		// 		fmt.Sprintf(fixtures.GET_PLUGINS_RESPONSE, r.port, r.port,
-		// 			r.port, r.port, r.port, r.port),
-		// 		ShouldResemble,
-		// 		string(body))
-		// })
+		Convey("Get task - v1/tasks/:id", func() {
+			pluginID := "1234"
+			resp, err := http.Get(
+				fmt.Sprintf("http://localhost:%d/v1/tasks/:%s", r.port, pluginID))
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, 200)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.GET_TASK_RESPONSE, r.port),
+				ShouldResemble,
+				string(body))
+		})
+
+		Convey("Get tasks - v1/tasks/:id/watch", func() {
+			// pluginID := "1234"
+			// resp, err := http.Get(
+			// 	fmt.Sprintf("http://localhost:%d/v1/tasks/:%s/watch", r.port, pluginID))
+			// So(err, ShouldBeNil)
+			// So(resp.StatusCode, ShouldEqual, 200)
+			// body, err := ioutil.ReadAll(resp.Body)
+			// So(err, ShouldBeNil)
+			// fmt.Print(string(body))
+			// So(
+			// 	fmt.Sprintf(fixtures.GET_TASK_RESPONSE, r.port),
+			// 	ShouldResemble,
+			// 	string(body))
+		})
+
+		Convey("Post tasks - v1/tasks", func() {
+			reader := strings.NewReader(fixtures.TASK)
+			resp, err := http.Post(fmt.Sprintf("http://localhost:%d/v1/tasks", r.port),
+				http.DetectContentType([]byte(fixtures.TASK)), reader)
+			So(err, ShouldBeNil)
+			So(resp, ShouldNotBeEmpty)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.POST_TASK, r.port),
+				ShouldResemble,
+				string(body))
+		})
+
+		Convey("Put tasks - v1/tasks/:id/start", func() {
+			c := &http.Client{}
+			taskID := "MockTask1234"
+			cd := cdata.NewNode()
+			cd.AddItem("user", ctypes.ConfigValueStr{Value: "Kelly"})
+			body, err := cd.MarshalJSON()
+			So(err, ShouldBeNil)
+
+			req, err := http.NewRequest(
+				http.MethodPut,
+				fmt.Sprintf("http://localhost:%d/v1/tasks/%s/start", r.port, taskID),
+				bytes.NewReader(body))
+			So(err, ShouldBeNil)
+			resp, err := c.Do(req)
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, http.StatusOK)
+			body, err = ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.PUT_TASK_ID_START),
+				ShouldResemble,
+				string(body))
+
+		})
+
+		Convey("Put tasks - v1/tasks/:id/stop", func() {
+			c := &http.Client{}
+			taskID := "MockTask1234"
+			cd := cdata.NewNode()
+			cd.AddItem("user", ctypes.ConfigValueStr{Value: "Kelly"})
+			body, err := cd.MarshalJSON()
+			So(err, ShouldBeNil)
+
+			req, err := http.NewRequest(
+				http.MethodPut,
+				fmt.Sprintf("http://localhost:%d/v1/tasks/%s/stop", r.port, taskID),
+				bytes.NewReader(body))
+			So(err, ShouldBeNil)
+			resp, err := c.Do(req)
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, http.StatusOK)
+			body, err = ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.PUT_TASK_ID_STOP),
+				ShouldResemble,
+				string(body))
+
+		})
+
+		Convey("Put tasks - v1/tasks/:id/enable", func() {
+			c := &http.Client{}
+			taskID := "MockTask1234"
+			cd := cdata.NewNode()
+			cd.AddItem("user", ctypes.ConfigValueStr{Value: "Kelly"})
+			body, err := cd.MarshalJSON()
+			So(err, ShouldBeNil)
+
+			req, err := http.NewRequest(
+				http.MethodPut,
+				fmt.Sprintf("http://localhost:%d/v1/tasks/%s/enable", r.port, taskID),
+				bytes.NewReader(body))
+			So(err, ShouldBeNil)
+			resp, err := c.Do(req)
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, http.StatusOK)
+			body, err = ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.PUT_TASK_ID_ENABLE),
+				ShouldResemble,
+				string(body))
+
+		})
 
 		//////////TEST-TRIBE-ROUTES/////////////////
 

@@ -462,23 +462,23 @@ func (s *Server) addRoutes() {
 	s.r.GET("/v1/plugins/:type/:name/:version", s.getPlugin)                        //done
 	s.r.POST("/v1/plugins", s.loadPlugin)                                           //done
 	s.r.DELETE("/v1/plugins/:type/:name/:version", s.unloadPlugin)                  //done
-	s.r.GET("/v1/plugins/:type/:name/:version/config", s.getPluginConfigItem)       //done
-	s.r.PUT("/v1/plugins/:type/:name/:version/config", s.setPluginConfigItem)       //done
+	s.r.GET("/v1/plugins/:type/:name/:version/config", s.getPluginConfigItem)       //done -check
+	s.r.PUT("/v1/plugins/:type/:name/:version/config", s.setPluginConfigItem)       //done -check
 	s.r.DELETE("/v1/plugins/:type/:name/:version/config", s.deletePluginConfigItem) //done
 
 	// metric routes
-	s.r.GET("/v1/metrics", s.getMetrics)                    //done- NOT RIGHT
-	s.r.GET("/v1/metrics/*namespace", s.getMetricsFromTree) //same implementation as above
+	s.r.GET("/v1/metrics", s.getMetrics)                    //done
+	s.r.GET("/v1/metrics/*namespace", s.getMetricsFromTree) //done, has same response as above.. ok?
 
 	// task routes
-	s.r.GET("/v1/tasks", s.getTasks)
-	s.r.GET("/v1/tasks/:id", s.getTask)
-	s.r.GET("/v1/tasks/:id/watch", s.watchTask)
-	s.r.POST("/v1/tasks", s.addTask)
-	s.r.PUT("/v1/tasks/:id/start", s.startTask)
-	s.r.PUT("/v1/tasks/:id/stop", s.stopTask)
+	s.r.GET("/v1/tasks", s.getTasks)            //done
+	s.r.GET("/v1/tasks/:id", s.getTask)         //done
+	s.r.GET("/v1/tasks/:id/watch", s.watchTask) //skipping for now, till watchTask enabled
+	s.r.POST("/v1/tasks", s.addTask)            //done
+	s.r.PUT("/v1/tasks/:id/start", s.startTask) //done
+	s.r.PUT("/v1/tasks/:id/stop", s.stopTask)   //done
 	s.r.DELETE("/v1/tasks/:id", s.removeTask)
-	s.r.PUT("/v1/tasks/:id/enable", s.enableTask)
+	s.r.PUT("/v1/tasks/:id/enable", s.enableTask) //done
 
 	// tribe routes
 	if s.tr != nil {
