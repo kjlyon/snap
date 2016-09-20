@@ -297,4 +297,16 @@ const (
     "href": ""
   }
 }`
+
+	DELETE_TASK_ID = `{
+  "meta": {
+    "code": 200,
+    "message": "Scheduled task (MockTask1234) removed",
+    "type": "scheduled_task_removed",
+    "version": 1
+  },
+  "body": {
+    "id": "MockTask1234"
+  }
+}`
 )

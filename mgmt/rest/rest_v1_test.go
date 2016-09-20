@@ -462,6 +462,31 @@ func TestV1(t *testing.T) {
 
 		})
 
+		Convey("Delete tasks - V1/tasks/:id", func() {
+			c := &http.Client{}
+			taskID := "MockTask1234"
+			cd := []string{"foo"}
+			body, err := json.Marshal(cd)
+			So(err, ShouldBeNil)
+			req, err := http.NewRequest(
+				http.MethodDelete,
+				fmt.Sprintf("http://localhost:%d/v1/tasks/%s",
+					r.port,
+					taskID),
+				bytes.NewReader([]byte{}))
+			So(err, ShouldBeNil)
+			resp, err := c.Do(req)
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, http.StatusOK)
+			body, err = ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.DELETE_TASK_ID),
+				ShouldResemble,
+				string(body))
+
+		})
+
 		//////////TEST-TRIBE-ROUTES/////////////////
 
 	})
