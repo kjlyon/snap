@@ -482,14 +482,14 @@ func (s *Server) addRoutes() {
 
 	// tribe routes
 	if s.tr != nil {
-		s.r.GET("/v1/tribe/agreements", s.getAgreements)
+		s.r.GET("/v1/tribe/agreements", s.getAgreements) //done
 		s.r.POST("/v1/tribe/agreements", s.addAgreement)
-		s.r.GET("/v1/tribe/agreements/:name", s.getAgreement)
+		s.r.GET("/v1/tribe/agreements/:name", s.getAgreement) //done
 		s.r.DELETE("/v1/tribe/agreements/:name", s.deleteAgreement)
 		s.r.PUT("/v1/tribe/agreements/:name/join", s.joinAgreement)
 		s.r.DELETE("/v1/tribe/agreements/:name/leave", s.leaveAgreement)
-		s.r.GET("/v1/tribe/members", s.getMembers)
-		s.r.GET("/v1/tribe/member/:name", s.getMember)
+		s.r.GET("/v1/tribe/members", s.getMembers)     //done
+		s.r.GET("/v1/tribe/member/:name", s.getMember) //done
 	}
 }
 

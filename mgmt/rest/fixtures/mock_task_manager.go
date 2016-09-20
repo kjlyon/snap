@@ -45,17 +45,6 @@ type mockTask struct {
 	MyHref               string            `json:"href"`
 }
 
-// var mt *mockTask
-
-// func init() {
-// 	//mtm.CreateTask(..?)
-
-// 	mt.SetID("ThisIsAnID")
-// 	mt.SetName("ThisIsAName")
-// 	mt.SetTaskID("ThisIsATaskID")
-// 	mt.Schedule()
-// }
-
 func (t *mockTask) ID() string                                { return t.MyID }
 func (t *mockTask) State() core.TaskState                     { return core.TaskSpinning }
 func (t *mockTask) HitCount() uint                            { return 0 }

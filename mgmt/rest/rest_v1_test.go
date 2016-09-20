@@ -62,10 +62,12 @@ func startV1API(cfg *mockConfig) *restAPIInstance {
 	mockMetricManager := &fixtures.MockManagesMetrics{}
 	mockTaskManager := &fixtures.MockTaskManager{}
 	mockConfigManager := &fixtures.MockConfigManager{}
+	mockTribeManager := &fixtures.MockTribeManager{}
 	//TODO bind mock task manager r.BindTaskManager(s)
 	r.BindMetricManager(mockMetricManager)
 	r.BindTaskManager(mockTaskManager)
 	r.BindConfigManager(mockConfigManager)
+	r.BindTribeManager(mockTribeManager)
 	//TODO bind mock config manager r.BindConfigManager(c.Config)
 	go func(ch <-chan error) {
 		// Block on the error channel. Will return exit status 1 for an error or
@@ -488,6 +490,64 @@ func TestV1(t *testing.T) {
 		})
 
 		//////////TEST-TRIBE-ROUTES/////////////////
+
+		Convey("Get tribe agreements - v1/tribe/agreements", func() {
+			resp, err := http.Get(
+				fmt.Sprintf("http://localhost:%d/v1/tribe/agreements", r.port))
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, 200)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.GET_TRIBE_AGREEMENTS),
+				ShouldResemble,
+				string(body))
+		})
+
+		Convey("Post tribe agreements - /v1/tribe/agreements", func() {
+
+		})
+
+		Convey("Get tribe agreements - v1/tribe/agreements/:name", func() {
+			tribeName := "Agree1"
+			resp, err := http.Get(
+				fmt.Sprintf("http://localhost:%d/v1/tribe/agreements/%s", r.port, tribeName))
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, 200)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.GET_TRIBE_AGREEMENTS_NAME),
+				ShouldResemble,
+				string(body))
+		})
+
+		Convey("Get tribe members - v1/tribe/members", func() {
+			resp, err := http.Get(
+				fmt.Sprintf("http://localhost:%d/v1/tribe/members", r.port))
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, 200)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.GET_TRIBE_MEMBERS),
+				ShouldResemble,
+				string(body))
+		})
+
+		Convey("Get tribe member - v1/tribe/member/:name", func() {
+			tribeName := "SomeName"
+			resp, err := http.Get(
+				fmt.Sprintf("http://localhost:%d/v1/tribe/member/%s", r.port, tribeName))
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, 200)
+			body, err := ioutil.ReadAll(resp.Body)
+			So(err, ShouldBeNil)
+			So(
+				fmt.Sprintf(fixtures.GET_TRIBE_MEMBER_NAME),
+				ShouldResemble,
+				string(body))
+		})
 
 	})
 
