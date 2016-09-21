@@ -1,4 +1,4 @@
-// + build legacy small medium large
+// +build legacy small medium large
 
 /*
 http://www.apache.org/licenses/LICENSE-2.0.txt
@@ -29,6 +29,8 @@ import (
 	"github.com/intelsdi-x/snap/core/serror"
 )
 
+//////MockLoadedPlugin/////
+
 type MockLoadedPlugin struct {
 	MyName    string
 	MyType    string
@@ -47,15 +49,11 @@ func (m MockLoadedPlugin) LoadedTimestamp() *time.Time {
 	return &t
 }
 func (m MockLoadedPlugin) Policy() *cpolicy.ConfigPolicy { return cpolicy.New() }
+func (m MockLoadedPlugin) HitCount() int                 { return 0 }
+func (m MockLoadedPlugin) LastHit() time.Time            { return time.Now() }
+func (m MockLoadedPlugin) ID() uint32                    { return 0 }
 
-// have my mock object also support AvailablePlugin
-func (m MockLoadedPlugin) HitCount() int { return 0 }
-func (m MockLoadedPlugin) LastHit() time.Time {
-	return time.Now()
-}
-func (m MockLoadedPlugin) ID() uint32 { return 0 }
-
-var catalog []core.CatalogedPlugin = []core.CatalogedPlugin{
+var pluginCatalog []core.CatalogedPlugin = []core.CatalogedPlugin{
 	MockLoadedPlugin{MyName: "foo", MyType: "collector", MyVersion: 2},
 	MockLoadedPlugin{MyName: "bar", MyType: "publisher", MyVersion: 3},
 	MockLoadedPlugin{MyName: "foo", MyType: "collector", MyVersion: 4},
@@ -64,7 +62,8 @@ var catalog []core.CatalogedPlugin = []core.CatalogedPlugin{
 	MockLoadedPlugin{MyName: "foobar", MyType: "processor", MyVersion: 1},
 }
 
-//////////
+//////MockCatalogedMetric/////
+
 type MockCatalogedMetric struct{}
 
 func (m MockCatalogedMetric) Namespace() core.Namespace {
@@ -80,7 +79,7 @@ var metricCatalog []core.CatalogedMetric = []core.CatalogedMetric{
 	MockCatalogedMetric{},
 }
 
-///////////
+//////MockManagesMetrics/////
 
 type MockManagesMetrics struct{}
 
@@ -100,7 +99,7 @@ func (m MockManagesMetrics) Load(*core.RequestedPlugin) (core.CatalogedPlugin, s
 	return MockLoadedPlugin{"foo", "collector", 1}, nil
 }
 func (m MockManagesMetrics) Unload(plugin core.Plugin) (core.CatalogedPlugin, serror.SnapError) {
-	for _, pl := range catalog {
+	for _, pl := range pluginCatalog {
 		if plugin.Name() == pl.Name() &&
 			plugin.Version() == pl.Version() &&
 			plugin.TypeName() == pl.TypeName() {
@@ -111,7 +110,7 @@ func (m MockManagesMetrics) Unload(plugin core.Plugin) (core.CatalogedPlugin, se
 }
 
 func (m MockManagesMetrics) PluginCatalog() core.PluginCatalog {
-	return catalog
+	return pluginCatalog
 }
 func (m MockManagesMetrics) AvailablePlugins() []core.AvailablePlugin {
 	return []core.AvailablePlugin{

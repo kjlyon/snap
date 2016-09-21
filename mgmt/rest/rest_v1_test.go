@@ -1,4 +1,4 @@
-// + build medium
+// +build medium
 
 /*
 http://www.apache.org/licenses/LICENSE-2.0.txt
@@ -56,19 +56,16 @@ type restAPIInstance struct {
 }
 
 func startV1API(cfg *mockConfig) *restAPIInstance {
-	// Start a REST API to talk to
 	log.SetLevel(LOG_LEVEL)
 	r, _ := New(cfg.RestAPI)
 	mockMetricManager := &fixtures.MockManagesMetrics{}
 	mockTaskManager := &fixtures.MockTaskManager{}
 	mockConfigManager := &fixtures.MockConfigManager{}
 	mockTribeManager := &fixtures.MockTribeManager{}
-	//TODO bind mock task manager r.BindTaskManager(s)
 	r.BindMetricManager(mockMetricManager)
 	r.BindTaskManager(mockTaskManager)
 	r.BindConfigManager(mockConfigManager)
 	r.BindTribeManager(mockTribeManager)
-	//TODO bind mock config manager r.BindConfigManager(c.Config)
 	go func(ch <-chan error) {
 		// Block on the error channel. Will return exit status 1 for an error or
 		// just return if the channel closes.
@@ -89,6 +86,7 @@ func startV1API(cfg *mockConfig) *restAPIInstance {
 func TestV1(t *testing.T) {
 	r := startV1API(getDefaultMockConfig())
 	Convey("Test REST API V1", t, func() {
+
 		//////////TEST-PLUGIN-ROUTES/////////////////
 		Convey("Get plugins - v1/plugins", func() {
 			resp, err := http.Get(
@@ -204,38 +202,6 @@ func TestV1(t *testing.T) {
 				fmt.Sprintf(fixtures.GET_PLUGIN_CONFIG_ITEM),
 				ShouldResemble,
 				string(body))
-
-			//DOES SAME THING
-
-			// c := &http.Client{}
-			// pluginName := "bar"
-			// pluginType := "publisher"
-			// pluginVersion := 3
-			// cd := cdata.NewNode()
-			// cd.AddItem("user", ctypes.ConfigValueStr{Value: "Jane"})
-			// body, err := cd.MarshalJSON()
-			// So(err, ShouldBeNil)
-
-			// req, err := http.NewRequest(
-			// 	http.MethodGet,
-			// 	fmt.Sprintf("http://localhost:%d/v1/plugins/%s/%s/%d/config",
-			// 		r.port,
-			// 		pluginType,
-			// 		pluginName,
-			// 		pluginVersion),
-			// 	bytes.NewReader(body))
-			// So(err, ShouldBeNil)
-			// resp, err := c.Do(req)
-			// So(err, ShouldBeNil)
-			// So(resp.StatusCode, ShouldEqual, http.StatusOK)
-			// body, err = ioutil.ReadAll(resp.Body)
-			// So(err, ShouldBeNil)
-			// //fmt.Print(string(body))
-			// So(
-			// 	fmt.Sprintf(fixtures.GET_PLUGIN_CONFIG_ITEM),
-			// 	ShouldResemble,
-			//	string(body))
-
 		})
 
 		Convey("Put plugins - v1/plugins/:type/:name/:version/config", func() {
@@ -287,7 +253,7 @@ func TestV1(t *testing.T) {
 				bytes.NewReader(body))
 
 			So(err, ShouldBeNil)
-			resp, err := c.Do(req) //Why does DO implementation not have an option for DELETE, why does it work in other one?
+			resp, err := c.Do(req)
 			So(err, ShouldBeNil)
 			So(resp.StatusCode, ShouldEqual, http.StatusOK)
 			body, err = ioutil.ReadAll(resp.Body)
@@ -405,7 +371,6 @@ func TestV1(t *testing.T) {
 				fmt.Sprintf(fixtures.PUT_TASK_ID_START),
 				ShouldResemble,
 				string(body))
-
 		})
 
 		Convey("Put tasks - v1/tasks/:id/stop", func() {
@@ -430,7 +395,6 @@ func TestV1(t *testing.T) {
 				fmt.Sprintf(fixtures.PUT_TASK_ID_STOP),
 				ShouldResemble,
 				string(body))
-
 		})
 
 		Convey("Put tasks - v1/tasks/:id/enable", func() {
@@ -455,7 +419,6 @@ func TestV1(t *testing.T) {
 				fmt.Sprintf(fixtures.PUT_TASK_ID_ENABLE),
 				ShouldResemble,
 				string(body))
-
 		})
 
 		Convey("Delete tasks - V1/tasks/:id", func() {
@@ -480,7 +443,6 @@ func TestV1(t *testing.T) {
 				fmt.Sprintf(fixtures.DELETE_TASK_ID),
 				ShouldResemble,
 				string(body))
-
 		})
 
 		//////////TEST-TRIBE-ROUTES/////////////////
@@ -613,7 +575,5 @@ func TestV1(t *testing.T) {
 				string(body))
 
 		})
-
 	})
-
 }

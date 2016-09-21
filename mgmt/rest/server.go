@@ -456,40 +456,40 @@ func (s *Server) BindConfigManager(c managesConfig) {
 
 func (s *Server) addRoutes() {
 	// plugin routes
-	s.r.GET("/v1/plugins", s.getPlugins)                                            //done
-	s.r.GET("/v1/plugins/:type", s.getPlugins)                                      //done
-	s.r.GET("/v1/plugins/:type/:name", s.getPlugins)                                //done
-	s.r.GET("/v1/plugins/:type/:name/:version", s.getPlugin)                        //done
-	s.r.POST("/v1/plugins", s.loadPlugin)                                           //done
-	s.r.DELETE("/v1/plugins/:type/:name/:version", s.unloadPlugin)                  //done
-	s.r.GET("/v1/plugins/:type/:name/:version/config", s.getPluginConfigItem)       //done
-	s.r.PUT("/v1/plugins/:type/:name/:version/config", s.setPluginConfigItem)       //done
-	s.r.DELETE("/v1/plugins/:type/:name/:version/config", s.deletePluginConfigItem) //done
+	s.r.GET("/v1/plugins", s.getPlugins)
+	s.r.GET("/v1/plugins/:type", s.getPlugins)
+	s.r.GET("/v1/plugins/:type/:name", s.getPlugins)
+	s.r.GET("/v1/plugins/:type/:name/:version", s.getPlugin)
+	s.r.POST("/v1/plugins", s.loadPlugin)
+	s.r.DELETE("/v1/plugins/:type/:name/:version", s.unloadPlugin)
+	s.r.GET("/v1/plugins/:type/:name/:version/config", s.getPluginConfigItem)
+	s.r.PUT("/v1/plugins/:type/:name/:version/config", s.setPluginConfigItem)
+	s.r.DELETE("/v1/plugins/:type/:name/:version/config", s.deletePluginConfigItem)
 
 	// metric routes
-	s.r.GET("/v1/metrics", s.getMetrics)                    //done
-	s.r.GET("/v1/metrics/*namespace", s.getMetricsFromTree) //done
+	s.r.GET("/v1/metrics", s.getMetrics)
+	s.r.GET("/v1/metrics/*namespace", s.getMetricsFromTree)
 
 	// task routes
-	s.r.GET("/v1/tasks", s.getTasks)              //done
-	s.r.GET("/v1/tasks/:id", s.getTask)           //done
-	s.r.GET("/v1/tasks/:id/watch", s.watchTask)   //done
-	s.r.POST("/v1/tasks", s.addTask)              //done
-	s.r.PUT("/v1/tasks/:id/start", s.startTask)   //done
-	s.r.PUT("/v1/tasks/:id/stop", s.stopTask)     //done
-	s.r.DELETE("/v1/tasks/:id", s.removeTask)     //done
-	s.r.PUT("/v1/tasks/:id/enable", s.enableTask) //done
+	s.r.GET("/v1/tasks", s.getTasks)
+	s.r.GET("/v1/tasks/:id", s.getTask)
+	s.r.GET("/v1/tasks/:id/watch", s.watchTask)
+	s.r.POST("/v1/tasks", s.addTask)
+	s.r.PUT("/v1/tasks/:id/start", s.startTask)
+	s.r.PUT("/v1/tasks/:id/stop", s.stopTask)
+	s.r.DELETE("/v1/tasks/:id", s.removeTask)
+	s.r.PUT("/v1/tasks/:id/enable", s.enableTask)
 
 	// tribe routes
 	if s.tr != nil {
-		s.r.GET("/v1/tribe/agreements", s.getAgreements)                 //done
-		s.r.POST("/v1/tribe/agreements", s.addAgreement)                 //done
-		s.r.GET("/v1/tribe/agreements/:name", s.getAgreement)            //done
-		s.r.DELETE("/v1/tribe/agreements/:name", s.deleteAgreement)      //done
-		s.r.PUT("/v1/tribe/agreements/:name/join", s.joinAgreement)      //done
-		s.r.DELETE("/v1/tribe/agreements/:name/leave", s.leaveAgreement) //done
-		s.r.GET("/v1/tribe/members", s.getMembers)                       //done
-		s.r.GET("/v1/tribe/member/:name", s.getMember)                   //done
+		s.r.GET("/v1/tribe/agreements", s.getAgreements)
+		s.r.POST("/v1/tribe/agreements", s.addAgreement)
+		s.r.GET("/v1/tribe/agreements/:name", s.getAgreement)
+		s.r.DELETE("/v1/tribe/agreements/:name", s.deleteAgreement)
+		s.r.PUT("/v1/tribe/agreements/:name/join", s.joinAgreement)
+		s.r.DELETE("/v1/tribe/agreements/:name/leave", s.leaveAgreement)
+		s.r.GET("/v1/tribe/members", s.getMembers)
+		s.r.GET("/v1/tribe/member/:name", s.getMember)
 	}
 }
 
