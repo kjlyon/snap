@@ -462,8 +462,8 @@ func (s *Server) addRoutes() {
 	s.r.GET("/v1/plugins/:type/:name/:version", s.getPlugin)                        //done
 	s.r.POST("/v1/plugins", s.loadPlugin)                                           //done
 	s.r.DELETE("/v1/plugins/:type/:name/:version", s.unloadPlugin)                  //done
-	s.r.GET("/v1/plugins/:type/:name/:version/config", s.getPluginConfigItem)       //done -check
-	s.r.PUT("/v1/plugins/:type/:name/:version/config", s.setPluginConfigItem)       //done -check
+	s.r.GET("/v1/plugins/:type/:name/:version/config", s.getPluginConfigItem)       //done
+	s.r.PUT("/v1/plugins/:type/:name/:version/config", s.setPluginConfigItem)       //done
 	s.r.DELETE("/v1/plugins/:type/:name/:version/config", s.deletePluginConfigItem) //done
 
 	// metric routes
@@ -484,9 +484,9 @@ func (s *Server) addRoutes() {
 	if s.tr != nil {
 		s.r.GET("/v1/tribe/agreements", s.getAgreements) //done
 		s.r.POST("/v1/tribe/agreements", s.addAgreement)
-		s.r.GET("/v1/tribe/agreements/:name", s.getAgreement) //done
-		s.r.DELETE("/v1/tribe/agreements/:name", s.deleteAgreement)
-		s.r.PUT("/v1/tribe/agreements/:name/join", s.joinAgreement)
+		s.r.GET("/v1/tribe/agreements/:name", s.getAgreement)       //done
+		s.r.DELETE("/v1/tribe/agreements/:name", s.deleteAgreement) //done
+		s.r.PUT("/v1/tribe/agreements/:name/join", s.joinAgreement) //done
 		s.r.DELETE("/v1/tribe/agreements/:name/leave", s.leaveAgreement)
 		s.r.GET("/v1/tribe/members", s.getMembers)     //done
 		s.r.GET("/v1/tribe/member/:name", s.getMember) //done

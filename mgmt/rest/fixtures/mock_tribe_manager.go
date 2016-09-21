@@ -126,4 +126,43 @@ const (
     "task_agreements": null
   }
 }`
+
+	DELETE_TRIBE_AGREEMENTS_NAME = `{
+  "meta": {
+    "code": 200,
+    "message": "Tribe agreement deleted",
+    "type": "tribe_agreement_deleted",
+    "version": 1
+  },
+  "body": {
+    "agreements": {
+      "Agree1": {
+        "name": "MyNewTribeNode",
+        "plugin_agreement": {},
+        "task_agreement": {}
+      },
+      "Agree2": {
+        "name": "MyNewTribeNode",
+        "plugin_agreement": {},
+        "task_agreement": {}
+      }
+    }
+  }
+}`
+
+	PUT_TRIBE_AGREEMENTS_NAME_JOIN = `{
+  "meta": {
+    "code": 200,
+    "message": "Tribe agreement joined",
+    "type": "tribe_agreement_joined",
+    "version": 1
+  },
+  "body": {
+    "agreement": {
+      "name": "MyNewTribeNode",
+      "plugin_agreement": {},
+      "task_agreement": {}
+    }
+  }
+}`
 )
