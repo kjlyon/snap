@@ -468,12 +468,12 @@ func (s *Server) addRoutes() {
 
 	// metric routes
 	s.r.GET("/v1/metrics", s.getMetrics)                    //done
-	s.r.GET("/v1/metrics/*namespace", s.getMetricsFromTree) //done, has same response as above.. ok?
+	s.r.GET("/v1/metrics/*namespace", s.getMetricsFromTree) //done
 
 	// task routes
 	s.r.GET("/v1/tasks", s.getTasks)              //done
 	s.r.GET("/v1/tasks/:id", s.getTask)           //done
-	s.r.GET("/v1/tasks/:id/watch", s.watchTask)   //skipping for now, till watchTask enabled
+	s.r.GET("/v1/tasks/:id/watch", s.watchTask)   //done
 	s.r.POST("/v1/tasks", s.addTask)              //done
 	s.r.PUT("/v1/tasks/:id/start", s.startTask)   //done
 	s.r.PUT("/v1/tasks/:id/stop", s.stopTask)     //done
@@ -482,14 +482,14 @@ func (s *Server) addRoutes() {
 
 	// tribe routes
 	if s.tr != nil {
-		s.r.GET("/v1/tribe/agreements", s.getAgreements) //done
-		s.r.POST("/v1/tribe/agreements", s.addAgreement)
-		s.r.GET("/v1/tribe/agreements/:name", s.getAgreement)       //done
-		s.r.DELETE("/v1/tribe/agreements/:name", s.deleteAgreement) //done
-		s.r.PUT("/v1/tribe/agreements/:name/join", s.joinAgreement) //done
-		s.r.DELETE("/v1/tribe/agreements/:name/leave", s.leaveAgreement)
-		s.r.GET("/v1/tribe/members", s.getMembers)     //done
-		s.r.GET("/v1/tribe/member/:name", s.getMember) //done
+		s.r.GET("/v1/tribe/agreements", s.getAgreements)                 //done
+		s.r.POST("/v1/tribe/agreements", s.addAgreement)                 //done
+		s.r.GET("/v1/tribe/agreements/:name", s.getAgreement)            //done
+		s.r.DELETE("/v1/tribe/agreements/:name", s.deleteAgreement)      //done
+		s.r.PUT("/v1/tribe/agreements/:name/join", s.joinAgreement)      //done
+		s.r.DELETE("/v1/tribe/agreements/:name/leave", s.leaveAgreement) //done
+		s.r.GET("/v1/tribe/members", s.getMembers)                       //done
+		s.r.GET("/v1/tribe/member/:name", s.getMember)                   //done
 	}
 }
 

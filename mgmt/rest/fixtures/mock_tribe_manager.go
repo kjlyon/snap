@@ -21,6 +21,10 @@ limitations under the License.
 package fixtures
 
 import (
+	"net"
+
+	"github.com/hashicorp/memberlist"
+	"github.com/intelsdi-x/snap/core"
 	"github.com/intelsdi-x/snap/core/serror"
 	"github.com/intelsdi-x/snap/mgmt/tribe/agreement"
 )
@@ -31,10 +35,23 @@ var mockTribeAgreement *agreement.Agreement
 var mockTribeMember *agreement.Member
 
 func init() {
-	mockTribeAgreement = agreement.New("MyNewTribeNode")
-	//var mlN *memberlist.Node
-	//mockTribeMember = agreement.NewMember(mlN)
-
+	mockTribeAgreement = agreement.New("Agree1")
+	mockTribeAgreement.PluginAgreement.Add(
+		agreement.Plugin{Name_: "mockVersion", Version_: 1, Type_: core.CollectorPluginType})
+	mockTribeAgreement.TaskAgreement.Add(
+		agreement.Task{ID: "mockTask", StartOnCreate: true})
+	mockTribeAgreement.Members["member1"] = agreement.NewMember(&memberlist.Node{
+		Name: "mockName",
+		Addr: net.ParseIP("193.34.23.11"),
+		Port: uint16(0),
+		Meta: []byte("meta"), // Metadata from the delegate for this node.
+		PMin: uint8(0),       // Minimum protocol version this understands
+		PMax: uint8(0),       // Maximum protocol version this understands
+		PCur: uint8(0),       // Current version node is speaking
+		DMin: uint8(0),       // Min protocol version for the delegate to understand
+		DMax: uint8(0),       // Max protocol version for the delegate to understand
+		DCur: uint8(0),       // Current version delegate is speaking
+	})
 }
 
 type MockTribeManager struct{}
@@ -67,14 +84,54 @@ const (
   "body": {
     "agreements": {
       "Agree1": {
-        "name": "MyNewTribeNode",
-        "plugin_agreement": {},
-        "task_agreement": {}
+        "name": "Agree1",
+        "plugin_agreement": {
+          "plugins": [
+            {
+              "name": "mockVersion",
+              "version": 1,
+              "type": 0
+            }
+          ]
+        },
+        "task_agreement": {
+          "tasks": [
+            {
+              "id": "mockTask",
+              "start_on_create": true
+            }
+          ]
+        },
+        "members": {
+          "member1": {
+            "name": "mockName"
+          }
+        }
       },
       "Agree2": {
-        "name": "MyNewTribeNode",
-        "plugin_agreement": {},
-        "task_agreement": {}
+        "name": "Agree1",
+        "plugin_agreement": {
+          "plugins": [
+            {
+              "name": "mockVersion",
+              "version": 1,
+              "type": 0
+            }
+          ]
+        },
+        "task_agreement": {
+          "tasks": [
+            {
+              "id": "mockTask",
+              "start_on_create": true
+            }
+          ]
+        },
+        "members": {
+          "member1": {
+            "name": "mockName"
+          }
+        }
       }
     }
   }
@@ -89,9 +146,29 @@ const (
   },
   "body": {
     "agreement": {
-      "name": "MyNewTribeNode",
-      "plugin_agreement": {},
-      "task_agreement": {}
+      "name": "Agree1",
+      "plugin_agreement": {
+        "plugins": [
+          {
+            "name": "mockVersion",
+            "version": 1,
+            "type": 0
+          }
+        ]
+      },
+      "task_agreement": {
+        "tasks": [
+          {
+            "id": "mockTask",
+            "start_on_create": true
+          }
+        ]
+      },
+      "members": {
+        "member1": {
+          "name": "mockName"
+        }
+      }
     }
   }
 }`
@@ -137,14 +214,54 @@ const (
   "body": {
     "agreements": {
       "Agree1": {
-        "name": "MyNewTribeNode",
-        "plugin_agreement": {},
-        "task_agreement": {}
+        "name": "Agree1",
+        "plugin_agreement": {
+          "plugins": [
+            {
+              "name": "mockVersion",
+              "version": 1,
+              "type": 0
+            }
+          ]
+        },
+        "task_agreement": {
+          "tasks": [
+            {
+              "id": "mockTask",
+              "start_on_create": true
+            }
+          ]
+        },
+        "members": {
+          "member1": {
+            "name": "mockName"
+          }
+        }
       },
       "Agree2": {
-        "name": "MyNewTribeNode",
-        "plugin_agreement": {},
-        "task_agreement": {}
+        "name": "Agree1",
+        "plugin_agreement": {
+          "plugins": [
+            {
+              "name": "mockVersion",
+              "version": 1,
+              "type": 0
+            }
+          ]
+        },
+        "task_agreement": {
+          "tasks": [
+            {
+              "id": "mockTask",
+              "start_on_create": true
+            }
+          ]
+        },
+        "members": {
+          "member1": {
+            "name": "mockName"
+          }
+        }
       }
     }
   }
@@ -159,9 +276,128 @@ const (
   },
   "body": {
     "agreement": {
-      "name": "MyNewTribeNode",
-      "plugin_agreement": {},
-      "task_agreement": {}
+      "name": "Agree1",
+      "plugin_agreement": {
+        "plugins": [
+          {
+            "name": "mockVersion",
+            "version": 1,
+            "type": 0
+          }
+        ]
+      },
+      "task_agreement": {
+        "tasks": [
+          {
+            "id": "mockTask",
+            "start_on_create": true
+          }
+        ]
+      },
+      "members": {
+        "member1": {
+          "name": "mockName"
+        }
+      }
+    }
+  }
+}`
+
+	DELETE_TRIBE_AGREEMENTS_NAME_LEAVE = `{
+  "meta": {
+    "code": 200,
+    "message": "Tribe agreement left",
+    "type": "tribe_agreement_left",
+    "version": 1
+  },
+  "body": {
+    "agreement": {
+      "name": "Agree1",
+      "plugin_agreement": {
+        "plugins": [
+          {
+            "name": "mockVersion",
+            "version": 1,
+            "type": 0
+          }
+        ]
+      },
+      "task_agreement": {
+        "tasks": [
+          {
+            "id": "mockTask",
+            "start_on_create": true
+          }
+        ]
+      },
+      "members": {
+        "member1": {
+          "name": "mockName"
+        }
+      }
+    }
+  }
+}`
+
+	POST_TRIBE_AGREEMENT = `{
+  "meta": {
+    "code": 200,
+    "message": "Tribe agreement created",
+    "type": "tribe_agreement_created",
+    "version": 1
+  },
+  "body": {
+    "agreements": {
+      "Agree1": {
+        "name": "Agree1",
+        "plugin_agreement": {
+          "plugins": [
+            {
+              "name": "mockVersion",
+              "version": 1,
+              "type": 0
+            }
+          ]
+        },
+        "task_agreement": {
+          "tasks": [
+            {
+              "id": "mockTask",
+              "start_on_create": true
+            }
+          ]
+        },
+        "members": {
+          "member1": {
+            "name": "mockName"
+          }
+        }
+      },
+      "Agree2": {
+        "name": "Agree1",
+        "plugin_agreement": {
+          "plugins": [
+            {
+              "name": "mockVersion",
+              "version": 1,
+              "type": 0
+            }
+          ]
+        },
+        "task_agreement": {
+          "tasks": [
+            {
+              "id": "mockTask",
+              "start_on_create": true
+            }
+          ]
+        },
+        "members": {
+          "member1": {
+            "name": "mockName"
+          }
+        }
+      }
     }
   }
 }`
