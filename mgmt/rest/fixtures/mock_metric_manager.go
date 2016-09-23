@@ -126,6 +126,8 @@ func (m MockManagesMetrics) GetAutodiscoverPaths() []string {
 	return nil
 }
 
+// These constants are the expected plugin responses from running
+// rest_v1_test.go on the plugin routes found in mgmt/rest/server.go
 const (
 	GET_PLUGINS_RESPONSE = `{
   "meta": {
@@ -284,7 +286,7 @@ const (
   ]
 }`
 
-	UNLOAD_PLUGIN = `{
+	UNLOAD_PLUGIN_RESPONSE = `{
   "meta": {
     "code": 200,
     "message": "Plugin successfully unloaded (foov2)",

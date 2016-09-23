@@ -133,6 +133,7 @@ func (m *MockTaskManager) EnableTask(id string) (core.Task, error) {
 		MyHref:              "http://localhost:8181/v2/tasks/alskdjf"}, nil
 }
 
+// Mock task used in the 'Add tasks' test in rest_v1_test.go
 const TASK = `{
     "version": 1,
     "schedule": {
@@ -150,6 +151,8 @@ const TASK = `{
 }
 `
 
+// These constants are the expected responses from running the task tests in
+// rest_v1_test.go on the task routes found in mgmt/rest/server.go
 const (
 	GET_TASKS_RESPONSE = `{
   "meta": {
@@ -209,7 +212,7 @@ const (
   }
 }`
 
-	POST_TASK = `{
+	ADD_TASK_RESPONSE = `{
   "meta": {
     "code": 201,
     "message": "Scheduled task created (MyTaskID)",
@@ -236,7 +239,7 @@ const (
   }
 }`
 
-	PUT_TASK_ID_START = `{
+	START_TASK_RESPONSE_ID_START = `{
   "meta": {
     "code": 200,
     "message": "Scheduled task (MockTask1234) started",
@@ -248,7 +251,7 @@ const (
   }
 }`
 
-	PUT_TASK_ID_STOP = `{
+	STOP_TASK_RESPONSE_ID_STOP = `{
   "meta": {
     "code": 200,
     "message": "Scheduled task (MockTask1234) stopped",
@@ -260,7 +263,7 @@ const (
   }
 }`
 
-	PUT_TASK_ID_ENABLE = `{
+	ENABLE_TASK_RESPONSE_ID_ENABLE = `{
   "meta": {
     "code": 200,
     "message": "Disabled task (alskdjf) enabled",
@@ -287,7 +290,7 @@ const (
   }
 }`
 
-	DELETE_TASK_ID = `{
+	REMOVE_TASK_RESPONSE_ID = `{
   "meta": {
     "code": 200,
     "message": "Scheduled task (MockTask1234) removed",

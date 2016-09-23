@@ -64,8 +64,10 @@ func (MockConfigManager) DeletePluginConfigDataNodeFieldAll(fields ...string) cd
 	return *mockConfig
 }
 
+// These constants are the expected plugin config responses from running
+// rest_v1_test.go on the plugin config routes found in mgmt/rest/server.go
 const (
-	PUT_PLUGIN_CONFIG_ITEM = `{
+	SET_PLUGIN_CONFIG_ITEM = `{
   "meta": {
     "code": 200,
     "message": "Plugin config item(s) set",

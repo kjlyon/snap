@@ -90,7 +90,6 @@ func (s *Server) loadPlugin(w http.ResponseWriter, r *http.Request, _ httprouter
 				break
 			}
 			if err != nil {
-				restLogger.Errorf("WE ARE HERE")
 				respond(500, rbody.FromError(err), w)
 				return
 			}

@@ -73,8 +73,10 @@ func (m *MockTribeManager) LeaveAgreement(agreementName, memberName string) serr
 func (m *MockTribeManager) GetMembers() []string                    { return []string{"one", "two", "three"} }
 func (m *MockTribeManager) GetMember(name string) *agreement.Member { return &agreement.Member{} }
 
+// These constants are the expected tribe responses from running
+// rest_v1_test.go on the tribe routes found in mgmt/rest/server.go
 const (
-	GET_TRIBE_AGREEMENTS = `{
+	GET_TRIBE_AGREEMENTS_RESPONSE = `{
   "meta": {
     "code": 200,
     "message": "Tribe agreements retrieved",
@@ -137,7 +139,7 @@ const (
   }
 }`
 
-	GET_TRIBE_AGREEMENTS_NAME = `{
+	GET_TRIBE_AGREEMENTS_RESPONSE_NAME = `{
   "meta": {
     "code": 200,
     "message": "Tribe agreement returned",
@@ -173,7 +175,7 @@ const (
   }
 }`
 
-	GET_TRIBE_MEMBERS = `{
+	GET_TRIBE_MEMBERS_RESPONSE = `{
   "meta": {
     "code": 200,
     "message": "Tribe members retrieved",
@@ -204,7 +206,7 @@ const (
   }
 }`
 
-	DELETE_TRIBE_AGREEMENTS_NAME = `{
+	DELETE_TRIBE_AGREEMENT_RESPONSE_NAME = `{
   "meta": {
     "code": 200,
     "message": "Tribe agreement deleted",
@@ -267,7 +269,7 @@ const (
   }
 }`
 
-	PUT_TRIBE_AGREEMENTS_NAME_JOIN = `{
+	JOIN_TRIBE_AGREEMENT_RESPONSE_NAME_JOIN = `{
   "meta": {
     "code": 200,
     "message": "Tribe agreement joined",
@@ -303,7 +305,7 @@ const (
   }
 }`
 
-	DELETE_TRIBE_AGREEMENTS_NAME_LEAVE = `{
+	LEAVE_TRIBE_AGREEMENT_REPSONSE_NAME_LEAVE = `{
   "meta": {
     "code": 200,
     "message": "Tribe agreement left",
@@ -339,7 +341,7 @@ const (
   }
 }`
 
-	POST_TRIBE_AGREEMENT = `{
+	ADD_TRIBE_AGREEMENT_RESPONSE = `{
   "meta": {
     "code": 200,
     "message": "Tribe agreement created",

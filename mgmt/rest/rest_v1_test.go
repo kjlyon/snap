@@ -186,7 +186,7 @@ func TestV1(t *testing.T) {
 			body, err := ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.UNLOAD_PLUGIN),
+				fmt.Sprintf(fixtures.UNLOAD_PLUGIN_RESPONSE),
 				ShouldResemble,
 				string(body))
 		})
@@ -204,7 +204,7 @@ func TestV1(t *testing.T) {
 				string(body))
 		})
 
-		Convey("Put plugins - v1/plugins/:type/:name/:version/config", func() {
+		Convey("Set plugin config item- v1/plugins/:type/:name/:version/config", func() {
 			c := &http.Client{}
 			pluginName := "foo"
 			pluginType := "collector"
@@ -229,13 +229,13 @@ func TestV1(t *testing.T) {
 			body, err = ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.PUT_PLUGIN_CONFIG_ITEM),
+				fmt.Sprintf(fixtures.SET_PLUGIN_CONFIG_ITEM),
 				ShouldResemble,
 				string(body))
 
 		})
 
-		Convey("Delete Plugin Config Item - /v1/plugins/:type/:name/:version/config", func() {
+		Convey("Delete plugin config item - /v1/plugins/:type/:name/:version/config", func() {
 			c := &http.Client{}
 			pluginName := "foo"
 			pluginType := "collector"
@@ -267,7 +267,7 @@ func TestV1(t *testing.T) {
 
 		//////////TEST-METRIC-ROUTES/////////////////
 
-		Convey("Get metric items - v1/metrics", func() {
+		Convey("Get metrics - v1/metrics", func() {
 			resp, err := http.Get(
 				fmt.Sprintf("http://localhost:%d/v1/metrics", r.port))
 			So(err, ShouldBeNil)
@@ -282,7 +282,7 @@ func TestV1(t *testing.T) {
 				resp1)
 		})
 
-		Convey("Get metric items - v1/metrics/*namespace", func() {
+		Convey("Get metrics from tree - v1/metrics/*namespace", func() {
 			resp, err := http.Get(
 				fmt.Sprintf("http://localhost:%d/v1/metrics/*namespace", r.port))
 			So(err, ShouldBeNil)
@@ -326,7 +326,7 @@ func TestV1(t *testing.T) {
 				string(body))
 		})
 
-		Convey("Get tasks - v1/tasks/:id/watch", func() {
+		Convey("Watch tasks - v1/tasks/:id/watch", func() {
 			taskID := "1234"
 			resp, err := http.Get(
 				fmt.Sprintf("http://localhost:%d/v1/tasks/:%s/watch", r.port, taskID))
@@ -334,7 +334,7 @@ func TestV1(t *testing.T) {
 			So(resp.StatusCode, ShouldEqual, 200)
 		})
 
-		Convey("Post tasks - v1/tasks", func() {
+		Convey("Add tasks - v1/tasks", func() {
 			reader := strings.NewReader(fixtures.TASK)
 			resp, err := http.Post(fmt.Sprintf("http://localhost:%d/v1/tasks", r.port),
 				http.DetectContentType([]byte(fixtures.TASK)), reader)
@@ -344,12 +344,12 @@ func TestV1(t *testing.T) {
 			body, err := ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.POST_TASK, r.port),
+				fmt.Sprintf(fixtures.ADD_TASK_RESPONSE, r.port),
 				ShouldResemble,
 				string(body))
 		})
 
-		Convey("Put tasks - v1/tasks/:id/start", func() {
+		Convey("Start tasks - v1/tasks/:id/start", func() {
 			c := &http.Client{}
 			taskID := "MockTask1234"
 			cd := cdata.NewNode()
@@ -368,12 +368,12 @@ func TestV1(t *testing.T) {
 			body, err = ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.PUT_TASK_ID_START),
+				fmt.Sprintf(fixtures.START_TASK_RESPONSE_ID_START),
 				ShouldResemble,
 				string(body))
 		})
 
-		Convey("Put tasks - v1/tasks/:id/stop", func() {
+		Convey("Stop tasks - v1/tasks/:id/stop", func() {
 			c := &http.Client{}
 			taskID := "MockTask1234"
 			cd := cdata.NewNode()
@@ -392,12 +392,12 @@ func TestV1(t *testing.T) {
 			body, err = ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.PUT_TASK_ID_STOP),
+				fmt.Sprintf(fixtures.STOP_TASK_RESPONSE_ID_STOP),
 				ShouldResemble,
 				string(body))
 		})
 
-		Convey("Put tasks - v1/tasks/:id/enable", func() {
+		Convey("Enable tasks - v1/tasks/:id/enable", func() {
 			c := &http.Client{}
 			taskID := "MockTask1234"
 			cd := cdata.NewNode()
@@ -416,12 +416,12 @@ func TestV1(t *testing.T) {
 			body, err = ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.PUT_TASK_ID_ENABLE),
+				fmt.Sprintf(fixtures.ENABLE_TASK_RESPONSE_ID_ENABLE),
 				ShouldResemble,
 				string(body))
 		})
 
-		Convey("Delete tasks - V1/tasks/:id", func() {
+		Convey("Remove tasks - V1/tasks/:id", func() {
 			c := &http.Client{}
 			taskID := "MockTask1234"
 			cd := []string{"foo"}
@@ -440,7 +440,7 @@ func TestV1(t *testing.T) {
 			body, err = ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.DELETE_TASK_ID),
+				fmt.Sprintf(fixtures.REMOVE_TASK_RESPONSE_ID),
 				ShouldResemble,
 				string(body))
 		})
@@ -455,12 +455,12 @@ func TestV1(t *testing.T) {
 			body, err := ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.GET_TRIBE_AGREEMENTS),
+				fmt.Sprintf(fixtures.GET_TRIBE_AGREEMENTS_RESPONSE),
 				ShouldResemble,
 				string(body))
 		})
 
-		Convey("Post tribe agreements - /v1/tribe/agreements", func() {
+		Convey("Add tribe agreements - /v1/tribe/agreements", func() {
 			agreement := "{\"Name\": \"Agree2\"}"
 			reader := strings.NewReader(agreement)
 			resp, err := http.Post(fmt.Sprintf("http://localhost:%d/v1/tribe/agreements", r.port),
@@ -471,7 +471,7 @@ func TestV1(t *testing.T) {
 			body, err := ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.POST_TRIBE_AGREEMENT),
+				fmt.Sprintf(fixtures.ADD_TRIBE_AGREEMENT_RESPONSE),
 				ShouldResemble,
 				string(body))
 		})
@@ -485,7 +485,7 @@ func TestV1(t *testing.T) {
 			body, err := ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.GET_TRIBE_AGREEMENTS_NAME),
+				fmt.Sprintf(fixtures.GET_TRIBE_AGREEMENTS_RESPONSE_NAME),
 				ShouldResemble,
 				string(body))
 		})
@@ -498,12 +498,12 @@ func TestV1(t *testing.T) {
 			body, err := ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.GET_TRIBE_MEMBERS),
+				fmt.Sprintf(fixtures.GET_TRIBE_MEMBERS_RESPONSE),
 				ShouldResemble,
 				string(body))
 		})
 
-		Convey("Delete tribe agreements - v1/tribe/agreements/:name", func() {
+		Convey("Delete tribe agreement - v1/tribe/agreements/:name", func() {
 			c := &http.Client{}
 			tribeName := "Agree1"
 			cd := []string{"foo"}
@@ -522,12 +522,12 @@ func TestV1(t *testing.T) {
 			body, err = ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.DELETE_TRIBE_AGREEMENTS_NAME),
+				fmt.Sprintf(fixtures.DELETE_TRIBE_AGREEMENT_RESPONSE_NAME),
 				ShouldResemble,
 				string(body))
 		})
 
-		Convey("Delete tribe agreements - v1/tribe/agreements/:name/leave", func() {
+		Convey("Leave tribe agreement - v1/tribe/agreements/:name/leave", func() {
 			c := &http.Client{}
 			tribeName := "Agree1"
 			cd := map[string]string{"Apple": "a", "Ball": "b", "Cat": "c"}
@@ -546,12 +546,12 @@ func TestV1(t *testing.T) {
 			body, err = ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.DELETE_TRIBE_AGREEMENTS_NAME_LEAVE),
+				fmt.Sprintf(fixtures.LEAVE_TRIBE_AGREEMENT_REPSONSE_NAME_LEAVE),
 				ShouldResemble,
 				string(body))
 		})
 
-		Convey("Put tribe agreements - v1/tribe/agreements/:name/join", func() {
+		Convey("Join tribe agreement - v1/tribe/agreements/:name/join", func() {
 			c := &http.Client{}
 			tribeName := "Agree1"
 			cd := cdata.NewNode()
@@ -570,7 +570,7 @@ func TestV1(t *testing.T) {
 			body, err = ioutil.ReadAll(resp.Body)
 			So(err, ShouldBeNil)
 			So(
-				fmt.Sprintf(fixtures.PUT_TRIBE_AGREEMENTS_NAME_JOIN),
+				fmt.Sprintf(fixtures.JOIN_TRIBE_AGREEMENT_RESPONSE_NAME_JOIN),
 				ShouldResemble,
 				string(body))
 
