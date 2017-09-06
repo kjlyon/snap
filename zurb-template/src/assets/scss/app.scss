@@ -273,6 +273,50 @@ display: block;}
     background: linear-gradient(45deg, #0071C5, #0071C5); 
 }
 
+.button2 {
+  // color:linear-gradient(45deg, #E311C2, #E01BC0);
+  font-size: 2rem;
+  letter-spacing: 5px;
+  // border: 4px solid linear-gradient(45deg, #C5BA00, #E0E532);
+  border-image: #0071C5;
+  border-image-slice: 1;
+  background: #0071C5;
+  // -webkit-background-clip: text;
+  -webkit-text-fill-color: white;
+  transition: all 0.2s ease; }
+  .button2:hover {
+    border-image: #0071C5;
+    border-image-slice: 1;
+    
+    background: white; 
+    -webkit-text-fill-color: #0071C5;
+    
+}
+
+// .button_invert {
+//   color: transparent;
+//   font-size: 2rem;
+//   letter-spacing: 5px;
+//   color: white;
+//   border: 4px solid transparent;
+//   border-image: linear-gradient(45deg, #fff, #fff);
+//   border-image-slice: 1;
+//   background: linear-gradient(45deg, #fff, #fff);
+//   -webkit-background-clip: text;
+//   text-fill-color: transparent;
+//   transition: all 0.2s ease; }
+//   .button:hover {
+//     border-image: linear-gradient(45deg, #fff, #fff);
+//     background: linear-gradient(45deg, #fff, #fff); 
+// }
+
+
+// .button_small {
+// 	transform: scale(0.5);	
+// 	line-height: 10px;
+// 	vertical-align: middle;
+// }
+
 .button_dwnld {
     font-size: .8rem;
     /*font-weight: bold;*/
